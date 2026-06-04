@@ -1,8 +1,8 @@
-# Orbitrip – AI Powered Travel Planning Platform
+# VOYA – AI Powered Travel Planning Platform
 
 ## Overview
 
-Orbitrip is a modern travel planning platform designed to simplify multi-city trip organization through intelligent planning, budgeting, collaboration, and itinerary visualization.
+Voya is a modern travel planning platform designed to simplify multi-city trip organization through intelligent planning, budgeting, collaboration, and itinerary visualization.
 
 Built for the Odoo Hackathon, Orbitrip transforms traditional travel planning into an interactive and personalized experience where users can:
 
@@ -27,7 +27,7 @@ Traditional travel planning is fragmented and time-consuming. Users often rely o
 * note management,
 * and collaboration.
 
-Orbitrip solves this by providing a unified platform for end-to-end trip planning with intelligent assistance and real-time organization.
+Voya solves this by providing a unified platform for end-to-end trip planning with intelligent assistance and real-time organization.
 
 The project is based on the personalized travel planning challenge provided in the hackathon problem statement. 
 
