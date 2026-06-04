@@ -1,0 +1,752 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OrbitTrip — Login</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0d14;
+    --surface: #111520;
+    --surface2: #181d2e;
+    --border: rgba(255,255,255,0.07);
+    --accent: #f5a623;
+    --accent2: #ff6b35;
+    --teal: #00d4aa;
+    --text: #e8eaf0;
+    --muted: #6b7290;
+    --user-glow: rgba(0, 212, 170, 0.18);
+    --admin-glow: rgba(245, 166, 35, 0.18);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Animated background */
+  .bg-orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.25;
+    pointer-events: none;
+    animation: drift 12s ease-in-out infinite alternate;
+  }
+  .bg-orb-1 { width: 600px; height: 600px; background: radial-gradient(circle, #00d4aa, transparent); top: -200px; left: -150px; animation-duration: 14s; }
+  .bg-orb-2 { width: 500px; height: 500px; background: radial-gradient(circle, #f5a623, transparent); bottom: -150px; right: -100px; animation-duration: 10s; }
+  .bg-orb-3 { width: 300px; height: 300px; background: radial-gradient(circle, #ff6b35, transparent); top: 40%; left: 40%; animation-duration: 16s; opacity: 0.12; }
+
+  @keyframes drift {
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(30px, 20px) scale(1.05); }
+  }
+
+  /* Grid pattern overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Left panel */
+  .left-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 60px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 60px;
+  }
+
+  .brand-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--teal), #0088cc);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+  }
+
+  .brand-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.5rem;
+    letter-spacing: -0.5px;
+  }
+
+  .brand-name span { color: var(--teal); }
+
+  .hero-text {
+    max-width: 420px;
+  }
+
+  .hero-text h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(2.2rem, 3.5vw, 3.2rem);
+    line-height: 1.1;
+    letter-spacing: -1.5px;
+    margin-bottom: 20px;
+  }
+
+  .hero-text h1 .highlight {
+    background: linear-gradient(90deg, var(--teal), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-text p {
+    color: var(--muted);
+    font-size: 1.05rem;
+    line-height: 1.65;
+    font-weight: 300;
+    margin-bottom: 48px;
+  }
+
+  .feature-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .feature-list li {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.9rem;
+    color: var(--muted);
+    font-weight: 400;
+  }
+
+  .feature-list li::before {
+    content: '';
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: rgba(0, 212, 170, 0.12);
+    border: 1px solid rgba(0, 212, 170, 0.25);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .feature-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: rgba(0, 212, 170, 0.12);
+    border: 1px solid rgba(0, 212, 170, 0.25);
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    font-size: 13px;
+  }
+
+  /* Right panel — form */
+  .right-panel {
+    width: 480px;
+    min-height: 100vh;
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 48px 44px;
+    position: relative;
+    z-index: 1;
+    overflow-y: auto;
+  }
+
+  .form-header {
+    margin-bottom: 32px;
+  }
+
+  .form-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1.7rem;
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
+  }
+
+  .form-subtitle {
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  /* Role toggle */
+  .role-toggle {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 4px;
+    margin-bottom: 28px;
+    position: relative;
+  }
+
+  .role-btn {
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 500;
+    padding: 10px 16px;
+    border-radius: 9px;
+    cursor: pointer;
+    transition: color 0.25s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .role-btn.active { color: var(--bg); }
+
+  .role-slider {
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    width: calc(50% - 4px);
+    left: 4px;
+    border-radius: 9px;
+    background: linear-gradient(135deg, var(--teal), #0099cc);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.3s;
+    box-shadow: 0 2px 12px rgba(0,212,170,0.4);
+  }
+
+  .role-slider.admin {
+    transform: translateX(calc(100% + 0px));
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    box-shadow: 0 2px 12px rgba(245,166,35,0.4);
+  }
+
+  /* Tab navigation (Login / Signup) */
+  .tab-nav {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 28px;
+  }
+
+  .tab-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 10px 20px 12px;
+    cursor: pointer;
+    position: relative;
+    transition: color 0.2s;
+  }
+
+  .tab-btn.active { color: var(--text); }
+
+  .tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0; right: 0;
+    height: 2px;
+    background: var(--teal);
+    border-radius: 2px;
+  }
+
+  .tab-btn.active[data-role="admin"]::after { background: var(--accent); }
+
+  /* Form */
+  .form-panel { display: none; }
+  .form-panel.active { display: block; }
+
+  .field {
+    margin-bottom: 18px;
+  }
+
+  label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--muted);
+    margin-bottom: 7px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.93rem;
+    padding: 12px 15px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    appearance: none;
+  }
+
+  input:focus, select:focus {
+    border-color: var(--teal);
+    box-shadow: 0 0 0 3px rgba(0,212,170,0.1);
+  }
+
+  .admin-role input:focus, .admin-role select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(245,166,35,0.1);
+  }
+
+  input::placeholder { color: #3a3f58; }
+
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+  .password-wrap { position: relative; }
+  .eye-btn {
+    position: absolute;
+    right: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    transition: color 0.2s;
+  }
+  .eye-btn:hover { color: var(--text); }
+
+  .forgot-link {
+    text-align: right;
+    margin-top: -10px;
+    margin-bottom: 18px;
+  }
+  .forgot-link a {
+    font-size: 0.8rem;
+    color: var(--teal);
+    text-decoration: none;
+    transition: opacity 0.2s;
+  }
+  .forgot-link a:hover { opacity: 0.75; }
+
+  .admin-role .forgot-link a { color: var(--accent); }
+
+  /* Validation */
+  .error-msg {
+    font-size: 0.76rem;
+    color: #ff5555;
+    margin-top: 5px;
+    display: none;
+  }
+  .field.error input { border-color: #ff5555; }
+  .field.error .error-msg { display: block; }
+
+  /* Submit button */
+  .submit-btn {
+    width: 100%;
+    padding: 13px;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: 0.3px;
+    cursor: pointer;
+    background: linear-gradient(135deg, var(--teal), #0099cc);
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(0,212,170,0.35);
+    transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+    margin-top: 4px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .submit-btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .submit-btn:hover { opacity: 0.92; transform: translateY(-1px); box-shadow: 0 6px 24px rgba(0,212,170,0.45); }
+  .submit-btn:hover::after { opacity: 1; }
+  .submit-btn:active { transform: translateY(0); }
+
+  .admin-role .submit-btn {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    box-shadow: 0 4px 20px rgba(245,166,35,0.35);
+  }
+  .admin-role .submit-btn:hover { box-shadow: 0 6px 24px rgba(245,166,35,0.45); }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 20px 0;
+    color: var(--muted);
+    font-size: 0.78rem;
+  }
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .signup-link {
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .signup-link a {
+    color: var(--teal);
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .signup-link a:hover { text-decoration: underline; }
+  .admin-role .signup-link a { color: var(--accent); }
+
+  /* Role badge on form */
+  .role-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(0,212,170,0.1);
+    border: 1px solid rgba(0,212,170,0.2);
+    color: var(--teal);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    margin-bottom: 20px;
+  }
+
+  .admin-role .role-badge {
+    background: rgba(245,166,35,0.1);
+    border-color: rgba(245,166,35,0.2);
+    color: var(--accent);
+  }
+
+  /* Admin-specific field */
+  .admin-only { display: none; }
+
+  /* Success toast */
+  .toast {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: #1a2035;
+    border: 1px solid rgba(0,212,170,0.3);
+    color: var(--text);
+    padding: 14px 24px;
+    border-radius: 12px;
+    font-size: 0.88rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+    z-index: 100;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--teal); }
+
+  /* select arrow */
+  .select-wrap { position: relative; }
+  .select-wrap::after {
+    content: '▾';
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    pointer-events: none;
+    font-size: 12px;
+  }
+  select { padding-right: 36px; }
+  select option { background: var(--surface2); }
+
+  @media (max-width: 820px) {
+    .left-panel { display: none; }
+    .right-panel { width: 100%; border-left: none; padding: 40px 28px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-orb bg-orb-1"></div>
+<div class="bg-orb bg-orb-2"></div>
+<div class="bg-orb bg-orb-3"></div>
+
+<!-- Left panel -->
+<div class="left-panel">
+  <div class="brand">
+    <div class="brand-icon">🌍</div>
+    <span class="brand-name">Orbit<span>Trip</span></span>
+  </div>
+  <div class="hero-text">
+    <h1>Plan your journey,<br><span class="highlight">orbit the world.</span></h1>
+    <p>OrbitTrip helps you discover, plan, and manage personal travel experiences — all in one beautifully crafted space.</p>
+    <ul class="feature-list">
+      <li><span class="feature-icon">✈️</span> Smart itinerary builder with AI suggestions</li>
+      <li><span class="feature-icon">🗺️</span> Interactive maps and destination guides</li>
+      <li><span class="feature-icon">📋</span> Track bookings, visas & travel docs</li>
+      <li><span class="feature-icon">👥</span> Collaborate with travel companions</li>
+    </ul>
+  </div>
+</div>
+
+<!-- Right panel -->
+<div class="right-panel" id="rightPanel">
+
+  <div class="form-header">
+    <div class="form-title">Welcome back 👋</div>
+    <div class="form-subtitle">Sign in or create your account below.</div>
+  </div>
+
+  <!-- Role toggle -->
+  <div class="role-toggle" id="roleToggle">
+    <div class="role-slider" id="roleSlider"></div>
+    <button class="role-btn active" id="userRoleBtn" onclick="setRole('user')">🧳 Traveller</button>
+    <button class="role-btn" id="adminRoleBtn" onclick="setRole('admin')">🛡️ Admin</button>
+  </div>
+
+  <!-- Role badge -->
+  <div class="role-badge" id="roleBadge">🧳 Traveller Access</div>
+
+  <!-- Tab nav -->
+  <div class="tab-nav" id="tabNav">
+    <button class="tab-btn active" onclick="setTab('login')" id="loginTab">Login</button>
+    <button class="tab-btn" onclick="setTab('signup')" id="signupTab" data-role="user">Sign Up</button>
+  </div>
+
+  <!-- LOGIN FORM -->
+  <div class="form-panel active" id="loginPanel">
+    <div class="field" id="emailFieldLogin">
+      <label>Email Address</label>
+      <input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email">
+      <div class="error-msg">Please enter a valid email.</div>
+    </div>
+    <div class="field" id="passwordFieldLogin">
+      <label>Password</label>
+      <div class="password-wrap">
+        <input type="password" id="loginPassword" placeholder="Enter your password">
+        <button class="eye-btn" onclick="togglePass('loginPassword', this)">👁</button>
+      </div>
+      <div class="error-msg">Password must be at least 6 characters.</div>
+    </div>
+    <div class="forgot-link"><a href="{% url 'forgot_pass' %}">Forgot password?</a></div>
+    <!-- Admin key field (admin only) -->
+    <div class="field admin-only" id="adminKeyField">
+      <label>Admin Access Key</label>
+      <input type="password" id="adminKey" placeholder="Enter your admin key">
+      <div class="error-msg">Admin key is required.</div>
+    </div>
+    <a href="{% url 'home' %}" style="text-decoration:none;">
+        <button class="submit-btn" onclick="handleLogin()">Sign In</button>
+    </a>
+    <div class="divider">or</div>
+    <div class="signup-link">Don't have an account? 
+        <a href="#" onclick="setTab('signup'); return false;">Sign up free</a>
+    </div>
+  </div>
+
+  <!-- SIGNUP FORM -->
+  <div class="form-panel" id="signupPanel">
+    <div class="field-row">
+      <div class="field" id="firstNameField">
+        <label>First Name</label>
+        <input type="text" id="firstName" placeholder="Jane">
+        <div class="error-msg">Required.</div>
+      </div>
+      <div class="field" id="lastNameField">
+        <label>Last Name</label>
+        <input type="text" id="lastName" placeholder="Doe">
+        <div class="error-msg">Required.</div>
+      </div>
+    </div>
+    <div class="field" id="emailFieldSignup">
+      <label>Email Address</label>
+      <input type="email" id="signupEmail" placeholder="you@example.com">
+      <div class="error-msg">Please enter a valid email.</div>
+    </div>
+    <div class="field" id="passwordFieldSignup">
+      <label>Password</label>
+      <div class="password-wrap">
+        <input type="password" id="signupPassword" placeholder="Min. 6 characters">
+        <button class="eye-btn" onclick="togglePass('signupPassword', this)">👁</button>
+      </div>
+      <div class="error-msg">Password must be at least 6 characters.</div>
+    </div>
+    <!-- Admin-specific fields -->
+    <div class="field admin-only" id="adminRoleSelectField">
+      <label>Admin Role</label>
+      <div class="select-wrap">
+        <select id="adminRoleSelect">
+          <option value="">Select admin role…</option>
+          <option value="super">Super Admin</option>
+          <option value="ops">Operations Manager</option>
+          <option value="support">Support Lead</option>
+          <option value="content">Content Manager</option>
+        </select>
+      </div>
+      <div class="error-msg">Please select a role.</div>
+    </div>
+    <div class="field admin-only" id="adminInviteField">
+      <label>Invite Code</label>
+      <input type="text" id="adminInvite" placeholder="ADMIN-XXXX-XXXX">
+      <div class="error-msg">Valid invite code required.</div>
+    </div>
+    <a href="{% url 'home' %}" style="text-decoration:none;">
+        <button class="submit-btn" onclick="handleSignup()">Create Account</button>
+    </a>
+    <div class="divider">or</div>
+    <div class="signup-link">Already have an account? <a href="#" onclick="setTab('login'); return false;">Sign in</a></div>
+  </div>
+
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <div class="toast-dot"></div>
+  <span id="toastMsg">Success!</span>
+</div>
+
+<script>
+  let currentRole = 'user';
+  let currentTab = 'login';
+
+  function setRole(role) {
+    currentRole = role;
+    const panel = document.getElementById('rightPanel');
+    const slider = document.getElementById('roleSlider');
+    const badge = document.getElementById('roleBadge');
+    const userBtn = document.getElementById('userRoleBtn');
+    const adminBtn = document.getElementById('adminRoleBtn');
+    const signupTab = document.getElementById('signupTab');
+    const adminOnlyFields = document.querySelectorAll('.admin-only');
+
+    if (role === 'admin') {
+      slider.classList.add('admin');
+      panel.classList.add('admin-role');
+      badge.textContent = '🛡️ Administrator Access';
+      userBtn.classList.remove('active');
+      adminBtn.classList.add('active');
+      signupTab.setAttribute('data-role', 'admin');
+      adminOnlyFields.forEach(f => f.style.display = 'block');
+    } else {
+      slider.classList.remove('admin');
+      panel.classList.remove('admin-role');
+      badge.textContent = '🧳 Traveller Access';
+      adminBtn.classList.remove('active');
+      userBtn.classList.add('active');
+      signupTab.removeAttribute('data-role');
+      adminOnlyFields.forEach(f => f.style.display = 'none');
+    }
+
+    // Update tab active indicator for admin
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.setAttribute('data-role', role);
+    });
+  }
+
+  function setTab(tab) {
+    currentTab = tab;
+    document.getElementById('loginPanel').classList.toggle('active', tab === 'login');
+    document.getElementById('signupPanel').classList.toggle('active', tab === 'signup');
+    document.getElementById('loginTab').classList.toggle('active', tab === 'login');
+    document.getElementById('signupTab').classList.toggle('active', tab === 'signup');
+  }
+
+  function togglePass(id, btn) {
+    const inp = document.getElementById(id);
+    if (inp.type === 'password') { inp.type = 'text'; btn.textContent = '🙈'; }
+    else { inp.type = 'password'; btn.textContent = '👁'; }
+  }
+
+  function validate(fieldId, inputId, condition) {
+    const field = document.getElementById(fieldId);
+    const val = document.getElementById(inputId)?.value?.trim() ?? '';
+    const ok = condition(val);
+    field.classList.toggle('error', !ok);
+    return ok;
+  }
+
+  function isEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+
+  function handleLogin() {
+    let ok = true;
+    ok = validate('emailFieldLogin', 'loginEmail', isEmail) && ok;
+    ok = validate('passwordFieldLogin', 'loginPassword', v => v.length >= 6) && ok;
+    if (currentRole === 'admin') {
+      ok = validate('adminKeyField', 'adminKey', v => v.length > 0) && ok;
+    }
+    if (ok) showToast(currentRole === 'admin' ? '✅ Admin login successful!' : '✅ Welcome back, Traveller!');
+  }
+
+  function handleSignup() {
+    let ok = true;
+    ok = validate('firstNameField', 'firstName', v => v.length > 0) && ok;
+    ok = validate('lastNameField', 'lastName', v => v.length > 0) && ok;
+    ok = validate('emailFieldSignup', 'signupEmail', isEmail) && ok;
+    ok = validate('passwordFieldSignup', 'signupPassword', v => v.length >= 6) && ok;
+    if (currentRole === 'admin') {
+      ok = validate('adminRoleSelectField', 'adminRoleSelect', v => v.length > 0) && ok;
+      ok = validate('adminInviteField', 'adminInvite', v => v.length > 6) && ok;
+    }
+    if (ok) showToast(currentRole === 'admin' ? '✅ Admin account created!' : '✅ Account created — let\'s explore!');
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    document.getElementById('toastMsg').textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3200);
+  }
+</script>
+</body>
+</html>

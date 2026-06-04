@@ -1,0 +1,1143 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OrbitTrip — Itinerary Studio</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ======================================================
+   Wayfare — Itinerary Studio
+   Dark, editorial, asymmetric. No purple gradients.
+   ====================================================== */
+
+    :root {
+    --bg: #0a0d14;
+    --surface: #111520;
+    --surface2: #181d2e;
+    --border: rgba(255, 255, 255, 0.07);
+    --border-strong: rgba(255, 255, 255, 0.14);
+    --accent: #f5a623;
+    --accent2: #ff6b35;
+    --teal: #00d4aa;
+    --text: #e8eaf0;
+    --muted: #6b7290;
+    --user-glow: rgba(0, 212, 170, 0.18);
+    --admin-glow: rgba(245, 166, 35, 0.18);
+
+    --radius-lg: 18px;
+    --radius-md: 12px;
+    --radius-sm: 8px;
+    --shadow-soft: 0 1px 0 rgba(255,255,255,0.04) inset, 0 24px 60px -28px rgba(0,0,0,0.65);
+
+    --font-display: "Instrument Serif", "Iowan Old Style", Georgia, serif;
+    --font-body: "Geist", "Inter", system-ui, -apple-system, sans-serif;
+    --font-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.5;
+    letter-spacing: -0.005em;
+    min-height: 100vh;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Subtle grain overlay for editorial depth */
+    .grain {
+    position: fixed; inset: 0;
+    pointer-events: none; z-index: 0;
+    opacity: 0.35;
+    background-image:
+        radial-gradient(at 12% 8%, rgba(245,166,35,0.08), transparent 38%),
+        radial-gradient(at 88% 92%, rgba(0,212,170,0.07), transparent 42%),
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.04 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    }
+
+    /* ===================== Topbar ===================== */
+    .topbar {
+    position: relative; z-index: 2;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 22px 56px;
+    border-bottom: 1px solid var(--border);
+    }
+    .brand { display: flex; align-items: center; gap: 14px; }
+    .brand-mark {
+    width: 38px; height: 38px;
+    border-radius: 11px;
+    display: grid; place-items: center;
+    color: var(--bg);
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    box-shadow: 0 8px 22px -10px rgba(245,166,35,0.55);
+    }
+    .brand-mark svg { width: 20px; height: 20px; }
+    .brand-text { display: flex; flex-direction: column; line-height: 1.1; }
+    .brand-name { font-family: var(--font-display); font-size: 22px; letter-spacing: 0.5px; }
+    .brand-tag { font-size: 11px; text-transform: uppercase; letter-spacing: 0.18em; color: var(--muted); }
+
+    .topbar-actions { display: flex; gap: 10px; }
+
+    /* ===================== Hero ===================== */
+    .hero {
+    position: relative; z-index: 1;
+    padding: 64px 56px 36px;
+    max-width: 1320px;
+    }
+    .hero-eyebrow {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.22em;
+    color: var(--accent);
+    background: var(--admin-glow);
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(245,166,35,0.25);
+    }
+    .hero-title {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(40px, 6vw, 68px);
+    line-height: 1.02;
+    letter-spacing: -0.012em;
+    margin: 22px 0 14px;
+    max-width: 18ch;
+    }
+    .hero-title em {
+    font-style: italic;
+    color: var(--teal);
+    font-family: var(--font-display);
+    }
+    .hero-sub { color: var(--muted); max-width: 56ch; font-size: 16px; }
+
+    /* ===================== Workspace ===================== */
+    .workspace {
+    position: relative; z-index: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    gap: 28px;
+    padding: 24px 56px 64px;
+    max-width: 1480px;
+    }
+    @media (max-width: 1080px) {
+    .workspace { grid-template-columns: 1fr; }
+    .topbar, .hero, .workspace, .foot { padding-left: 24px; padding-right: 24px; }
+    }
+
+    .panel {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    box-shadow: var(--shadow-soft);
+    }
+    .panel.builder::before,
+    .panel.viewer::before {
+    content: ""; position: absolute; inset: -1px; border-radius: inherit;
+    pointer-events: none; opacity: 0.35;
+    background: linear-gradient(180deg, transparent 60%, var(--user-glow));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+    padding: 1px;
+    }
+    .panel.builder::before { background: linear-gradient(180deg, transparent 60%, var(--admin-glow)); }
+
+    .panel-head {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 16px; margin-bottom: 18px;
+    }
+    .panel-head-left { display: flex; gap: 14px; align-items: flex-start; }
+    .panel-num {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--muted);
+    border: 1px dashed var(--border-strong);
+    padding: 6px 9px;
+    border-radius: 8px;
+    letter-spacing: 0.1em;
+    }
+    .panel-title {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 26px;
+    margin: 0 0 4px;
+    letter-spacing: -0.005em;
+    }
+    .panel-sub { color: var(--muted); margin: 0; font-size: 13.5px; max-width: 50ch; }
+
+    /* ===================== Buttons ===================== */
+    .primary-btn, .ghost-btn, .icon-btn, .toggle-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: 13px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background-color .18s ease, color .18s ease, border-color .18s ease, transform .18s ease, box-shadow .18s ease;
+    white-space: nowrap;
+    }
+    .primary-btn {
+    background: var(--accent);
+    color: #1a1303;
+    border: 1px solid rgba(0,0,0,0.2);
+    padding: 10px 16px;
+    box-shadow: 0 10px 22px -14px rgba(245,166,35,0.85), inset 0 -2px 0 rgba(0,0,0,0.18);
+    font-weight: 600;
+    }
+    .primary-btn:hover { transform: translateY(-1px); background: #ffb73a; }
+    .primary-btn:active { transform: translateY(0); }
+
+    .ghost-btn {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border-strong);
+    padding: 9px 14px;
+    }
+    .ghost-btn:hover { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.22); }
+
+    .icon-btn {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid transparent;
+    padding: 7px;
+    border-radius: 9px;
+    }
+    .icon-btn:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+    .icon-btn.danger:hover { color: #ff8a6b; background: rgba(255,107,53,0.08); }
+
+    /* View toggle (segmented) */
+    .view-toggle {
+    display: inline-flex;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 4px;
+    gap: 2px;
+    }
+    .toggle-btn {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid transparent;
+    padding: 7px 14px;
+    font-size: 12.5px;
+    }
+    .toggle-btn:hover { color: var(--text); }
+    .toggle-btn.is-active {
+    background: var(--bg);
+    color: var(--text);
+    border-color: var(--border-strong);
+    box-shadow: 0 1px 0 rgba(255,255,255,0.04);
+    }
+
+    /* ===================== Builder content ===================== */
+    .stops-meta {
+    display: flex; gap: 8px; flex-wrap: wrap;
+    margin-bottom: 14px;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--muted);
+    }
+    .stops-meta .chip {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 5px 10px;
+    border-radius: 999px;
+    }
+    .stops-meta .chip strong { color: var(--text); font-weight: 500; }
+
+    .stops { display: flex; flex-direction: column; gap: 14px; }
+
+    .stop-card {
+    display: grid;
+    grid-template-columns: 56px 1fr;
+    gap: 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 14px 14px 14px 8px;
+    transition: border-color .18s ease, transform .18s ease;
+    animation: rise .35s cubic-bezier(.2,.7,.2,1);
+    }
+    .stop-card:hover { border-color: rgba(255,255,255,0.12); }
+
+    @keyframes rise {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: none; }
+    }
+
+    .stop-rail {
+    display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+    padding: 4px 0;
+    border-right: 1px dashed var(--border);
+    }
+    .rail-btn {
+    background: transparent;
+    border: 1px solid var(--border-strong);
+    color: var(--muted);
+    border-radius: 8px;
+    padding: 4px;
+    cursor: pointer;
+    display: grid; place-items: center;
+    transition: color .18s ease, border-color .18s ease, background-color .18s ease;
+    }
+    .rail-btn:hover { color: var(--accent); border-color: var(--accent); background: var(--admin-glow); }
+    .rail-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    .rail-index {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--accent);
+    background: var(--admin-glow);
+    border: 1px solid rgba(245,166,35,0.3);
+    padding: 4px 6px;
+    border-radius: 6px;
+    letter-spacing: 0.08em;
+    }
+
+    .stop-body { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+    .stop-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr) auto;
+    gap: 10px; align-items: end;
+    }
+    @media (max-width: 720px) {
+    .stop-row { grid-template-columns: 1fr 1fr; }
+    .stop-row .field-grow { grid-column: 1 / -1; }
+    }
+
+    .field { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+    .field span {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--muted);
+    }
+    .input {
+    width: 100%;
+    background: var(--bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-family: var(--font-body);
+    font-size: 14px;
+    outline: none;
+    transition: border-color .18s ease, box-shadow .18s ease, background-color .18s ease;
+    }
+    .input:hover { border-color: rgba(255,255,255,0.14); }
+    .input:focus { border-color: var(--teal); box-shadow: 0 0 0 4px var(--user-glow); }
+    .input::placeholder { color: #4a506a; }
+    .input[type="date"], .input[type="time"] { color-scheme: dark; }
+    .input-time { max-width: 120px; }
+
+    /* Activities list */
+    .activities {
+    display: flex; flex-direction: column; gap: 6px;
+    border-left: 2px solid var(--border);
+    margin-left: 4px;
+    padding-left: 12px;
+    }
+    .activities:empty { display: none; }
+    .activity-row {
+    display: grid;
+    grid-template-columns: 70px 8px 1fr auto;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 10px;
+    animation: rise .25s cubic-bezier(.2,.7,.2,1);
+    }
+    .activity-time {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 0.04em;
+    }
+    .activity-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--teal);
+    box-shadow: 0 0 0 4px var(--user-glow);
+    }
+    .activity-title { font-size: 14px; color: var(--text); }
+
+    .activity-add {
+    display: grid;
+    grid-template-columns: 120px 1fr auto;
+    gap: 8px; align-items: center;
+    margin-top: 2px;
+    }
+    .add-activity { padding: 10px 14px; }
+
+    /* Empty state */
+    .empty-state {
+    position: relative;
+    text-align: center;
+    padding: 36px 20px;
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--radius-md);
+    margin-top: 6px;
+    }
+    .empty-state h3 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 22px;
+    margin: 0 0 6px;
+    }
+    .empty-state p { color: var(--muted); margin: 0; }
+    .empty-state strong { color: var(--accent); font-weight: 500; }
+    .empty-glow {
+    position: absolute; inset: auto 0 0 0; height: 80%;
+    background: radial-gradient(60% 60% at 50% 100%, var(--admin-glow), transparent 70%);
+    z-index: -1;
+    }
+
+    /* ===================== Viewer ===================== */
+    .view-area { min-height: 320px; }
+
+    /* Calendar grid */
+    .cal-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 12px;
+    }
+    .cal-day {
+    position: relative;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px;
+    display: flex; flex-direction: column; gap: 8px;
+    min-height: 132px;
+    animation: rise .35s cubic-bezier(.2,.7,.2,1);
+    }
+    .cal-day-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 8px;
+    }
+    .cal-day-num {
+    font-family: var(--font-display);
+    font-size: 28px;
+    line-height: 1;
+    color: var(--text);
+    }
+    .cal-day-meta {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    }
+    .cal-city {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px;
+    color: var(--accent);
+    background: var(--admin-glow);
+    border: 1px solid rgba(245,166,35,0.3);
+    padding: 4px 9px;
+    border-radius: 999px;
+    width: fit-content;
+    }
+    .cal-city svg { width: 11px; height: 11px; }
+    .cal-acts { display: flex; flex-direction: column; gap: 5px; }
+    .cal-act {
+    display: grid; grid-template-columns: 50px 1fr; gap: 8px; align-items: baseline;
+    font-size: 12.5px;
+    }
+    .cal-act time { font-family: var(--font-mono); color: var(--teal); font-size: 11.5px; }
+    .cal-act span { color: var(--text); }
+    .cal-empty {
+    font-size: 12px; color: var(--muted); font-style: italic;
+    }
+    .cal-day.is-empty {
+    background: transparent;
+    border-style: dashed;
+    }
+
+    /* Timeline / list view */
+    .tl-stop {
+    position: relative;
+    border-left: 2px solid var(--border);
+    padding: 0 0 22px 22px;
+    margin-left: 8px;
+    animation: rise .35s cubic-bezier(.2,.7,.2,1);
+    }
+    .tl-stop:last-child { padding-bottom: 4px; }
+    .tl-stop::before {
+    content: ""; position: absolute; left: -7px; top: 4px;
+    width: 12px; height: 12px; border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 4px var(--admin-glow);
+    }
+    .tl-city {
+    font-family: var(--font-display);
+    font-size: 24px;
+    line-height: 1.1;
+    margin: 0 0 4px;
+    }
+    .tl-dates {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    margin-bottom: 10px;
+    }
+    .tl-day {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    }
+    .tl-day-head {
+    display: flex; align-items: baseline; gap: 10px;
+    margin-bottom: 6px;
+    }
+    .tl-day-head h4 {
+    margin: 0; font-size: 13px; font-weight: 500;
+    color: var(--text);
+    }
+    .tl-day-head .tl-day-date {
+    font-family: var(--font-mono); font-size: 11px; color: var(--muted);
+    }
+    .tl-day .tl-act {
+    display: grid; grid-template-columns: 70px 1fr; gap: 10px;
+    font-size: 13px; padding: 4px 0;
+    }
+    .tl-act time { font-family: var(--font-mono); color: var(--accent); font-size: 12px; }
+
+    /* Empty viewer placeholder */
+    .view-empty {
+    text-align: center; padding: 60px 20px;
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--radius-md);
+    color: var(--muted);
+    }
+    .view-empty h3 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 22px;
+    margin: 0 0 6px;
+    color: var(--text);
+    }
+
+    /* Footer */
+    .foot {
+    position: relative; z-index: 1;
+    padding: 22px 56px 36px;
+    color: var(--muted); font-size: 12px;
+    border-top: 1px solid var(--border);
+    }
+
+    /* Selection */
+    ::selection { background: var(--admin-glow); color: var(--text); }
+
+    /* Scrollbars */
+    ::-webkit-scrollbar { width: 10px; height: 10px; }
+    ::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #232a45; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+  </style>
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+
+  <header class="topbar" data-testid="topbar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 21s-7-7.5-7-12a7 7 0 0 1 14 0c0 4.5-7 12-7 12Z"/>
+          <circle cx="12" cy="9" r="2.4"/>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <span class="brand-name">OrbitTrip</span>
+        <span class="brand-tag">Itinerary Studio</span>
+      </div>
+    </div>
+
+    <nav class="topbar-actions">
+      <button class="ghost-btn" id="resetBtn" data-testid="reset-trip-btn" type="button" title="Clear the entire trip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+        Reset trip
+      </button>
+    </nav>
+  </header>
+
+  <section class="hero" data-testid="hero">
+    <h1 class="hero-title">
+      Build the trip <em>day&nbsp;by&nbsp;day</em>,<br/>
+      then watch it bloom on the calendar.
+    </h1>
+    <p class="hero-sub">An interactive workspace to drop cities, pick dates, and stack activities — with an instant timeline and calendar view of the whole adventure.</p>
+  </section>
+
+  <main class="workspace" data-testid="workspace">
+    <!-- ===================== BUILDER ===================== -->
+    <section class="panel builder" aria-label="Itinerary Builder" data-testid="builder-panel">
+      <header class="panel-head">
+        <div class="panel-head-left">
+          <div>
+            <h2 class="panel-title">Itinerary Builder</h2>
+            <p class="panel-sub">Add cities, set travel windows, assign activities to each stop.</p>
+          </div>
+        </div>
+        <button class="primary-btn" id="addStopBtn" data-testid="add-stop-btn" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+          Add Stop
+        </button>
+      </header>
+
+      <div class="stops-meta" id="stopsMeta" data-testid="stops-meta"></div>
+
+      <div class="stops" id="stopsList" data-testid="stops-list"></div>
+
+      <div class="empty-state" id="emptyState" data-testid="empty-state" hidden>
+        <div class="empty-glow" aria-hidden="true"></div>
+        <h3>No stops yet</h3>
+        <p>Tap <strong>Add Stop</strong> to drop your first city onto the map of this trip.</p>
+      </div>
+    </section>
+
+    <!-- ===================== VIEW ===================== -->
+    <section class="panel viewer" aria-label="Itinerary View" data-testid="viewer-panel">
+      <header class="panel-head">
+        <div class="panel-head-left">
+          <div>
+            <h2 class="panel-title">Itinerary View</h2>
+            <p class="panel-sub">A structured snapshot of your full plan — by day or on the calendar.</p>
+          </div>
+        </div>
+
+        <div class="view-toggle" role="tablist" aria-label="View mode" data-testid="view-toggle">
+          <button role="tab" class="toggle-btn is-active" data-mode="calendar" data-testid="toggle-calendar" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg>
+            Calendar
+          </button>
+          <button role="tab" class="toggle-btn" data-mode="list" data-testid="toggle-list" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg>
+            Timeline
+          </button>
+        </div>
+      </header>
+
+      <div class="view-area" id="viewArea" data-testid="view-area"></div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <span>OrbitTrip © crafted for the wanderers · saved locally on your device</span>
+  </footer>
+
+  <!-- Templates -->
+  <template id="stopTemplate">
+    <article class="stop-card" data-testid="stop-card">
+      <div class="stop-rail">
+        <button class="rail-btn" data-action="up" data-testid="stop-move-up" type="button" title="Move up" aria-label="Move stop up">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M18 15l-6-6-6 6"/></svg>
+        </button>
+        <div class="rail-index" data-testid="stop-index">01</div>
+        <button class="rail-btn" data-action="down" data-testid="stop-move-down" type="button" title="Move down" aria-label="Move stop down">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+      </div>
+
+      <div class="stop-body">
+        <div class="stop-row">
+          <label class="field field-grow">
+            <span>City</span>
+            <input class="input" data-field="city" data-testid="stop-city-input" type="text" placeholder="e.g. Lisbon" autocomplete="off" />
+          </label>
+          <label class="field">
+            <span>Arrive</span>
+            <input class="input" data-field="startDate" data-testid="stop-start-date" type="date" />
+          </label>
+          <label class="field">
+            <span>Depart</span>
+            <input class="input" data-field="endDate" data-testid="stop-end-date" type="date" />
+          </label>
+          <button class="icon-btn danger" data-action="delete-stop" data-testid="delete-stop-btn" type="button" title="Remove stop" aria-label="Remove stop">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+          </button>
+        </div>
+
+        <div class="activities" data-testid="activities-list"></div>
+
+        <div class="activity-add">
+          <input class="input input-time" data-field="newActivityTime" data-testid="new-activity-time" type="time" />
+          <input class="input" data-field="newActivityTitle" data-testid="new-activity-title" type="text" placeholder="Add an activity — e.g. Sunset at Miradouro" />
+          <button class="ghost-btn add-activity" data-action="add-activity" data-testid="add-activity-btn" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+            Add
+          </button>
+        </div>
+      </div>
+    </article>
+  </template>
+
+  <template id="activityTemplate">
+    <div class="activity-row" data-testid="activity-row">
+      <span class="activity-time" data-field="time"></span>
+      <span class="activity-dot" aria-hidden="true"></span>
+      <span class="activity-title" data-field="title"></span>
+      <button class="icon-btn ghost-icon" data-action="delete-activity" data-testid="delete-activity-btn" type="button" title="Remove activity" aria-label="Remove activity">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      </button>
+    </div>
+  </template>
+
+  <script>
+    /* ============================================================
+   Wayfare — Itinerary Studio (vanilla JS)
+   - Builder: add/remove/reorder stops, edit city/dates, manage activities
+   - View: Calendar grid (default) and Timeline list
+   - Persists to localStorage. No hard-coded data.
+   ============================================================ */
+
+    (function () {
+    "use strict";
+
+    const STORAGE_KEY = "wayfare.itinerary.v1";
+    let state = loadState();
+
+    // ---------- DOM refs ----------
+    const stopsList = document.getElementById("stopsList");
+    const stopsMeta = document.getElementById("stopsMeta");
+    const emptyState = document.getElementById("emptyState");
+    const viewArea = document.getElementById("viewArea");
+    const addStopBtn = document.getElementById("addStopBtn");
+    const resetBtn = document.getElementById("resetBtn");
+    const stopTpl = document.getElementById("stopTemplate");
+    const activityTpl = document.getElementById("activityTemplate");
+    const toggleBtns = document.querySelectorAll(".toggle-btn");
+
+    // ---------- helpers ----------
+    function uid() {
+        return Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
+    }
+
+    function loadState() {
+        try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+            const parsed = JSON.parse(raw);
+            if (parsed && Array.isArray(parsed.stops)) {
+            return {
+                stops: parsed.stops,
+                viewMode: parsed.viewMode === "list" ? "list" : "calendar",
+            };
+            }
+        }
+        } catch (_e) { /* ignore */ }
+        return { stops: [], viewMode: "calendar" };
+    }
+
+    function saveState() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function pad2(n) { return String(n).padStart(2, "0"); }
+
+    function parseDate(s) {
+        if (!s) return null;
+        const [y, m, d] = s.split("-").map(Number);
+        if (!y || !m || !d) return null;
+        return new Date(y, m - 1, d);
+    }
+
+    function fmtDate(s) {
+        const d = parseDate(s);
+        if (!d) return "";
+        return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+    }
+
+    function fmtWeekday(s) {
+        const d = parseDate(s);
+        if (!d) return "";
+        return d.toLocaleDateString(undefined, { weekday: "short" });
+    }
+
+    function daysBetween(a, b) {
+        if (!a || !b) return [];
+        const start = parseDate(a);
+        const end = parseDate(b);
+        if (!start || !end || end < start) return [];
+        const out = [];
+        const cursor = new Date(start);
+        while (cursor <= end) {
+        out.push(`${cursor.getFullYear()}-${pad2(cursor.getMonth() + 1)}-${pad2(cursor.getDate())}`);
+        cursor.setDate(cursor.getDate() + 1);
+        }
+        return out;
+    }
+
+    function findStop(id) { return state.stops.find(s => s.id === id); }
+    function stopIndex(id) { return state.stops.findIndex(s => s.id === id); }
+
+    // ---------- mutations ----------
+    function addStop() {
+        const stop = {
+        id: uid(),
+        city: "",
+        startDate: "",
+        endDate: "",
+        activities: [], // { id, time, title, date? }
+        _draftTime: "",
+        _draftTitle: "",
+        };
+        state.stops.push(stop);
+        saveState();
+        render();
+        // Focus the new city input
+        requestAnimationFrame(() => {
+        const card = stopsList.querySelector(`[data-id="${stop.id}"]`);
+        const cityInput = card && card.querySelector('[data-field="city"]');
+        if (cityInput) cityInput.focus();
+        });
+    }
+
+    function removeStop(id) {
+        state.stops = state.stops.filter(s => s.id !== id);
+        saveState();
+        render();
+    }
+
+    function moveStop(id, dir) {
+        const i = stopIndex(id);
+        if (i < 0) return;
+        const j = i + dir;
+        if (j < 0 || j >= state.stops.length) return;
+        const arr = state.stops;
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+        saveState();
+        render();
+    }
+
+    function updateStopField(id, field, value) {
+        const stop = findStop(id);
+        if (!stop) return;
+        stop[field] = value;
+        // If endDate is before startDate, clear it
+        if (field === "startDate" && stop.endDate && parseDate(stop.endDate) < parseDate(value)) {
+        stop.endDate = "";
+        }
+        saveState();
+        // Light re-render only updates dependent UI; full re-render is fine here.
+        renderViewer();
+        renderMeta();
+    }
+
+    function addActivity(stopId) {
+        const stop = findStop(stopId);
+        if (!stop) return;
+        const time = (stop._draftTime || "").trim();
+        const title = (stop._draftTitle || "").trim();
+        if (!title) return;
+        stop.activities.push({ id: uid(), time, title });
+        // sort by time (empty times go last)
+        stop.activities.sort((a, b) => {
+        if (!a.time && !b.time) return 0;
+        if (!a.time) return 1;
+        if (!b.time) return -1;
+        return a.time.localeCompare(b.time);
+        });
+        stop._draftTime = "";
+        stop._draftTitle = "";
+        saveState();
+        render();
+    }
+
+    function removeActivity(stopId, actId) {
+        const stop = findStop(stopId);
+        if (!stop) return;
+        stop.activities = stop.activities.filter(a => a.id !== actId);
+        saveState();
+        render();
+    }
+
+    function setViewMode(mode) {
+        state.viewMode = mode === "list" ? "list" : "calendar";
+        saveState();
+        toggleBtns.forEach(b => b.classList.toggle("is-active", b.dataset.mode === state.viewMode));
+        renderViewer();
+    }
+
+    function resetTrip() {
+        if (state.stops.length === 0) return;
+        const ok = window.confirm("Clear the entire trip? This removes every stop and activity.");
+        if (!ok) return;
+        state.stops = [];
+        saveState();
+        render();
+    }
+
+    // ---------- render ----------
+    function render() {
+        renderBuilder();
+        renderViewer();
+        renderMeta();
+    }
+
+    function renderMeta() {
+        const totalStops = state.stops.length;
+        const totalActs = state.stops.reduce((n, s) => n + s.activities.length, 0);
+        const allDays = new Set();
+        state.stops.forEach(s => daysBetween(s.startDate, s.endDate).forEach(d => allDays.add(d)));
+        const totalDays = allDays.size;
+
+        if (totalStops === 0) {
+        stopsMeta.innerHTML = "";
+        return;
+        }
+        stopsMeta.innerHTML = `
+        <span class="chip" data-testid="meta-stops"><strong>${totalStops}</strong> ${totalStops === 1 ? "stop" : "stops"}</span>
+        <span class="chip" data-testid="meta-days"><strong>${totalDays}</strong> ${totalDays === 1 ? "day" : "days"}</span>
+        <span class="chip" data-testid="meta-activities"><strong>${totalActs}</strong> ${totalActs === 1 ? "activity" : "activities"}</span>
+        `;
+    }
+
+    function renderBuilder() {
+        stopsList.innerHTML = "";
+        emptyState.hidden = state.stops.length !== 0;
+
+        state.stops.forEach((stop, idx) => {
+        const node = stopTpl.content.firstElementChild.cloneNode(true);
+        node.dataset.id = stop.id;
+        node.querySelector('[data-testid="stop-index"]').textContent = pad2(idx + 1);
+
+        const cityInput = node.querySelector('[data-field="city"]');
+        const startInput = node.querySelector('[data-field="startDate"]');
+        const endInput = node.querySelector('[data-field="endDate"]');
+        cityInput.value = stop.city || "";
+        startInput.value = stop.startDate || "";
+        endInput.value = stop.endDate || "";
+        if (stop.startDate) endInput.min = stop.startDate;
+
+        cityInput.addEventListener("input", e => updateStopField(stop.id, "city", e.target.value));
+        startInput.addEventListener("change", e => updateStopField(stop.id, "startDate", e.target.value));
+        endInput.addEventListener("change", e => updateStopField(stop.id, "endDate", e.target.value));
+
+        // up / down / delete
+        const upBtn = node.querySelector('[data-action="up"]');
+        const downBtn = node.querySelector('[data-action="down"]');
+        const delBtn = node.querySelector('[data-action="delete-stop"]');
+        if (idx === 0) upBtn.disabled = true;
+        if (idx === state.stops.length - 1) downBtn.disabled = true;
+        upBtn.addEventListener("click", () => moveStop(stop.id, -1));
+        downBtn.addEventListener("click", () => moveStop(stop.id, 1));
+        delBtn.addEventListener("click", () => removeStop(stop.id));
+
+        // activities list
+        const actsWrap = node.querySelector('[data-testid="activities-list"]');
+        stop.activities.forEach(act => {
+            const aNode = activityTpl.content.firstElementChild.cloneNode(true);
+            aNode.dataset.id = act.id;
+            const timeEl = aNode.querySelector('[data-field="time"]');
+            timeEl.textContent = act.time || "—:—";
+            aNode.querySelector('[data-field="title"]').textContent = act.title;
+            aNode.querySelector('[data-action="delete-activity"]')
+            .addEventListener("click", () => removeActivity(stop.id, act.id));
+            actsWrap.appendChild(aNode);
+        });
+
+        // add-activity row
+        const newTime = node.querySelector('[data-field="newActivityTime"]');
+        const newTitle = node.querySelector('[data-field="newActivityTitle"]');
+        newTime.value = stop._draftTime || "";
+        newTitle.value = stop._draftTitle || "";
+        newTime.addEventListener("input", e => { stop._draftTime = e.target.value; });
+        newTitle.addEventListener("input", e => { stop._draftTitle = e.target.value; });
+        newTitle.addEventListener("keydown", e => {
+            if (e.key === "Enter") { e.preventDefault(); addActivity(stop.id); }
+        });
+        node.querySelector('[data-action="add-activity"]')
+            .addEventListener("click", () => addActivity(stop.id));
+
+        stopsList.appendChild(node);
+        });
+    }
+
+    function renderViewer() {
+        viewArea.innerHTML = "";
+
+        // Build day-by-day plan, in stop order
+        const plan = []; // [{ date, city, stopId, activities: [] }]
+        state.stops.forEach(stop => {
+        const days = daysBetween(stop.startDate, stop.endDate);
+        days.forEach(date => {
+            plan.push({
+            date,
+            city: stop.city,
+            stopId: stop.id,
+            activities: stop.activities, // shared across stop's days (no per-day yet)
+            });
+        });
+        });
+
+        if (plan.length === 0) {
+        viewArea.innerHTML = `
+            <div class="view-empty" data-testid="view-empty">
+            <h3>Your trip will appear here</h3>
+            <p>Add a stop with a city and travel dates to see it laid out by day.</p>
+            </div>`;
+        return;
+        }
+
+        if (state.viewMode === "calendar") {
+        renderCalendar(plan);
+        } else {
+        renderTimeline();
+        }
+    }
+
+    function renderCalendar(plan) {
+        const grid = document.createElement("div");
+        grid.className = "cal-grid";
+        grid.setAttribute("data-testid", "calendar-grid");
+
+        plan.forEach((day, i) => {
+        const d = parseDate(day.date);
+        const cell = document.createElement("div");
+        cell.className = "cal-day";
+        cell.setAttribute("data-testid", "calendar-day");
+
+        const head = document.createElement("div");
+        head.className = "cal-day-head";
+        head.innerHTML = `
+            <div>
+            <div class="cal-day-num">${d.getDate()}</div>
+            <div class="cal-day-meta">${d.toLocaleDateString(undefined, { weekday: "short", month: "short" })}</div>
+            </div>
+            <div class="cal-day-meta">Day ${i + 1}</div>
+        `;
+        cell.appendChild(head);
+
+        const cityChip = document.createElement("span");
+        cityChip.className = "cal-city";
+        cityChip.setAttribute("data-testid", "calendar-city");
+        cityChip.innerHTML = `
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-7.5-7-12a7 7 0 0 1 14 0c0 4.5-7 12-7 12Z"/><circle cx="12" cy="9" r="2.4"/></svg>
+            <span>${day.city || "Unnamed city"}</span>
+        `;
+        cell.appendChild(cityChip);
+
+        const acts = document.createElement("div");
+        acts.className = "cal-acts";
+        if (day.activities.length === 0) {
+            const empty = document.createElement("div");
+            empty.className = "cal-empty";
+            empty.textContent = "No activities yet";
+            acts.appendChild(empty);
+        } else {
+            day.activities.forEach(a => {
+            const row = document.createElement("div");
+            row.className = "cal-act";
+            row.setAttribute("data-testid", "calendar-activity");
+            row.innerHTML = `<time>${a.time || "—:—"}</time><span></span>`;
+            row.querySelector("span").textContent = a.title;
+            acts.appendChild(row);
+            });
+        }
+        cell.appendChild(acts);
+
+        grid.appendChild(cell);
+        });
+
+        viewArea.appendChild(grid);
+    }
+
+    function renderTimeline() {
+        const wrap = document.createElement("div");
+        wrap.setAttribute("data-testid", "timeline-list");
+
+        state.stops.forEach(stop => {
+        const days = daysBetween(stop.startDate, stop.endDate);
+        const stopBlock = document.createElement("div");
+        stopBlock.className = "tl-stop";
+        stopBlock.setAttribute("data-testid", "timeline-stop");
+
+        const cityH = document.createElement("h3");
+        cityH.className = "tl-city";
+        cityH.textContent = stop.city || "Unnamed city";
+        stopBlock.appendChild(cityH);
+
+        const range = document.createElement("div");
+        range.className = "tl-dates";
+        if (stop.startDate || stop.endDate) {
+            range.textContent = `${fmtDate(stop.startDate) || "—"} → ${fmtDate(stop.endDate) || "—"}`;
+        } else {
+            range.textContent = "Dates not set";
+        }
+        stopBlock.appendChild(range);
+
+        if (days.length === 0) {
+            const note = document.createElement("div");
+            note.className = "cal-empty";
+            note.textContent = "Add travel dates to see day-wise plan";
+            stopBlock.appendChild(note);
+        } else {
+            days.forEach((date, idx) => {
+            const d = parseDate(date);
+            const dayCard = document.createElement("div");
+            dayCard.className = "tl-day";
+
+            const head = document.createElement("div");
+            head.className = "tl-day-head";
+            head.innerHTML = `
+                <h4>Day ${idx + 1}</h4>
+                <span class="tl-day-date">${d.toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" })}</span>
+            `;
+            dayCard.appendChild(head);
+
+            if (stop.activities.length === 0) {
+                const empty = document.createElement("div");
+                empty.className = "cal-empty";
+                empty.textContent = "No activities planned";
+                dayCard.appendChild(empty);
+            } else {
+                stop.activities.forEach(a => {
+                const row = document.createElement("div");
+                row.className = "tl-act";
+                row.innerHTML = `<time>${a.time || "—:—"}</time><span></span>`;
+                row.querySelector("span").textContent = a.title;
+                dayCard.appendChild(row);
+                });
+            }
+            stopBlock.appendChild(dayCard);
+            });
+        }
+
+        wrap.appendChild(stopBlock);
+        });
+
+        viewArea.appendChild(wrap);
+    }
+
+    // ---------- wire up ----------
+    addStopBtn.addEventListener("click", addStop);
+    resetBtn.addEventListener("click", resetTrip);
+    toggleBtns.forEach(btn => btn.addEventListener("click", () => setViewMode(btn.dataset.mode)));
+
+    // initial sync
+    toggleBtns.forEach(b => b.classList.toggle("is-active", b.dataset.mode === state.viewMode));
+    render();
+    })();
+  </script>
+</body>
+</html>

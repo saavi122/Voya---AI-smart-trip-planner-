@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OrbitTrip — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0d14; --surface: #111520; --surface2: #181d2e; --surface3: #1e2438;
+    --border: rgba(255,255,255,0.07); --accent: #f5a623; --accent2: #ff6b35;
+    --teal: #00d4aa; --teal2: #0099cc; --text: #e8eaf0; --muted: #6b7290;
+    --sidebar-w: 240px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; overflow-x: hidden; }
+
+  .bg-orb { position: fixed; border-radius: 50%; filter: blur(90px); opacity: 0.15; pointer-events: none; animation: drift 14s ease-in-out infinite alternate; }
+  .bg-orb-1 { width: 700px; height: 700px; background: radial-gradient(circle, #00d4aa, transparent); top: -250px; left: 180px; }
+  .bg-orb-2 { width: 500px; height: 500px; background: radial-gradient(circle, #f5a623, transparent); bottom: -100px; right: 60px; animation-duration: 11s; opacity: 0.1; }
+  @keyframes drift { 0% { transform: translate(0,0) scale(1); } 100% { transform: translate(25px,18px) scale(1.04); } }
+  body::before { content: ''; position: fixed; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.012) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.012) 1px, transparent 1px); background-size: 48px 48px; pointer-events: none; z-index: 0; }
+
+  /* SIDEBAR */
+  .sidebar { width: var(--sidebar-w); min-height: 100vh; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 28px 16px; position: fixed; top: 0; left: 0; bottom: 0; z-index: 10; animation: slideInLeft 0.5s ease both; }
+  @keyframes slideInLeft { from { transform: translateX(-20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  .brand { display: flex; align-items: center; gap: 10px; padding: 0 8px; margin-bottom: 36px; }
+  .brand-icon { width: 38px; height: 38px; border-radius: 10px; background: linear-gradient(135deg, var(--teal), var(--teal2)); display: grid; place-items: center; font-size: 18px; box-shadow: 0 2px 12px rgba(0,212,170,0.35); }
+  .brand-name { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.2rem; letter-spacing: -0.5px; }
+  .brand-name span { color: var(--teal); }
+  .nav-section-label { font-size: 0.65rem; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); padding: 0 10px; margin: 20px 0 8px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; color: var(--muted); font-size: 0.88rem; font-weight: 500; cursor: pointer; text-decoration: none; transition: background 0.18s, color 0.18s; margin-bottom: 2px; }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: rgba(0,212,170,0.1); color: var(--teal); }
+  .nav-item .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+  .nav-badge { margin-left: auto; background: var(--teal); color: var(--bg); font-size: 0.68rem; font-weight: 700; padding: 2px 7px; border-radius: 20px; line-height: 1.5; }
+  .sidebar-footer { margin-top: auto; border-top: 1px solid var(--border); padding-top: 20px; }
+  .user-chip { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; transition: background 0.18s; cursor: pointer; }
+  .user-chip:hover { background: var(--surface2); }
+  .avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, var(--teal), var(--teal2)); display: grid; place-items: center; font-size: 14px; font-weight: 700; color: var(--bg); font-family: 'Syne', sans-serif; flex-shrink: 0; }
+  .user-info .user-name { font-size: 0.85rem; font-weight: 500; }
+  .user-info .user-role { font-size: 0.72rem; color: var(--muted); }
+
+  /* MAIN */
+  .main { margin-left: var(--sidebar-w); flex: 1; padding: 36px 40px; position: relative; z-index: 1; overflow-y: auto; min-height: 100vh; }
+  .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 36px; animation: fadeUp 0.5s 0.1s ease both; }
+  .welcome-block h1 { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.75rem; letter-spacing: -0.8px; margin-bottom: 3px; }
+  .welcome-block h1 span { color: var(--teal); }
+  .welcome-block p { color: var(--muted); font-size: 0.88rem; }
+  .topbar-actions { display: flex; align-items: center; gap: 12px; }
+  .search-bar { display: flex; align-items: center; gap: 8px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 9px 14px; color: var(--muted); font-size: 0.85rem; cursor: pointer; transition: border-color 0.2s; }
+  .search-bar:hover { border-color: rgba(255,255,255,0.14); color: var(--text); }
+  .icon-btn { width: 38px; height: 38px; border-radius: 10px; background: var(--surface); border: 1px solid var(--border); display: grid; place-items: center; cursor: pointer; font-size: 16px; transition: background 0.2s, border-color 0.2s; }
+  .icon-btn:hover { background: var(--surface2); border-color: rgba(255,255,255,0.14); }
+  .plan-btn { display: flex; align-items: center; gap: 8px; background: linear-gradient(135deg, var(--teal), var(--teal2)); color: var(--bg); border: none; border-radius: 10px; padding: 10px 18px; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.88rem; cursor: pointer; box-shadow: 0 3px 16px rgba(0,212,170,0.35); transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s; white-space: nowrap; }
+  .plan-btn:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 5px 20px rgba(0,212,170,0.45); }
+  .plan-btn:active { transform: translateY(0); }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* Stats */
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; animation: fadeUp 0.5s 0.15s ease both; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px 22px; transition: border-color 0.2s, transform 0.2s; position: relative; overflow: hidden; }
+  .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--teal), transparent); opacity: 0; transition: opacity 0.2s; }
+  .stat-card:hover { border-color: rgba(0,212,170,0.2); transform: translateY(-2px); }
+  .stat-card:hover::before { opacity: 1; }
+  .stat-label { font-size: 0.75rem; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+  .stat-value { font-family: 'Syne', sans-serif; font-size: 1.9rem; font-weight: 800; letter-spacing: -1px; margin-bottom: 4px; }
+  .stat-sub { font-size: 0.75rem; color: var(--teal); font-weight: 500; }
+  .stat-sub.warn { color: var(--accent); }
+
+  /* Quick actions */
+  .quick-actions { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 32px; animation: fadeUp 0.5s 0.12s ease both; }
+  .qa-btn { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 12px; display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; transition: all 0.2s; text-align: center; }
+  .qa-btn:hover { background: var(--surface2); border-color: rgba(0,212,170,0.2); transform: translateY(-2px); }
+  .qa-icon { font-size: 22px; }
+  .qa-label { font-size: 0.75rem; color: var(--muted); font-weight: 500; line-height: 1.2; }
+
+  /* Grid */
+  .grid-2 { display: grid; grid-template-columns: 1fr 380px; gap: 24px; margin-bottom: 28px; }
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .section-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.05rem; letter-spacing: -0.3px; }
+  .section-link { font-size: 0.8rem; color: var(--teal); cursor: pointer; text-decoration: none; }
+  .section-link:hover { text-decoration: underline; }
+
+  /* Trip cards */
+  .trips-list { display: flex; flex-direction: column; gap: 12px; }
+  .trip-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; display: flex; align-items: center; gap: 16px; transition: border-color 0.2s, transform 0.2s, background 0.2s; cursor: pointer; animation: fadeUp 0.5s ease both; }
+  .trip-card:hover { border-color: rgba(0,212,170,0.2); transform: translateX(4px); background: var(--surface2); }
+  .trip-thumb { width: 54px; height: 54px; border-radius: 12px; display: grid; place-items: center; font-size: 26px; flex-shrink: 0; background: var(--surface2); }
+  .trip-info { flex: 1; min-width: 0; }
+  .trip-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.95rem; margin-bottom: 3px; }
+  .trip-meta { font-size: 0.78rem; color: var(--muted); display: flex; gap: 12px; flex-wrap: wrap; }
+  .trip-status { font-size: 0.72rem; font-weight: 600; padding: 4px 10px; border-radius: 20px; flex-shrink: 0; }
+  .status-upcoming { background: rgba(0,212,170,0.1); color: var(--teal); border: 1px solid rgba(0,212,170,0.2); }
+  .status-planning { background: rgba(245,166,35,0.1); color: var(--accent); border: 1px solid rgba(245,166,35,0.2); }
+  .status-completed { background: rgba(107,114,144,0.15); color: var(--muted); border: 1px solid var(--border); }
+  .trip-budget { text-align: right; flex-shrink: 0; }
+  .trip-budget .amount { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.95rem; }
+  .trip-budget .budget-label { font-size: 0.7rem; color: var(--muted); }
+
+  /* Budget panel */
+  .budget-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 22px; animation: fadeUp 0.5s 0.2s ease both; }
+  .budget-total { text-align: center; padding: 20px 0 24px; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+  .budget-total .blabel { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .budget-total .big { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 2.2rem; letter-spacing: -1.5px; }
+  .budget-total .big span { color: var(--teal); }
+  .budget-total .bsub { font-size: 0.78rem; color: var(--muted); margin-top: 4px; }
+  .budget-item { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .budget-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .budget-item-info { flex: 1; }
+  .budget-item-name { font-size: 0.83rem; font-weight: 500; margin-bottom: 5px; }
+  .budget-bar-track { height: 5px; background: var(--surface3); border-radius: 10px; overflow: hidden; }
+  .budget-bar-fill { height: 100%; border-radius: 10px; transition: width 1s cubic-bezier(0.4,0,0.2,1); }
+  .budget-item-amount { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.85rem; text-align: right; flex-shrink: 0; min-width: 56px; }
+
+  /* Destinations */
+  .dest-section { animation: fadeUp 0.5s 0.25s ease both; }
+  .dest-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .dest-card { border-radius: 14px; overflow: hidden; position: relative; aspect-ratio: 3/4; cursor: pointer; transition: transform 0.3s, box-shadow 0.3s; background: var(--surface2); border: 1px solid var(--border); }
+  .dest-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.4); }
+  .dest-bg { position: absolute; inset: 0; font-size: 60px; display: flex; align-items: center; justify-content: center; }
+  .dest-bg-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(10,13,20,0.9) 0%, rgba(10,13,20,0.2) 60%, transparent 100%); }
+  .dest-info { position: absolute; bottom: 0; left: 0; right: 0; padding: 14px; }
+  .dest-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.92rem; margin-bottom: 2px; }
+  .dest-country { font-size: 0.72rem; color: rgba(232,234,240,0.6); margin-bottom: 8px; }
+  .dest-tag { display: inline-block; font-size: 0.65rem; font-weight: 600; padding: 3px 8px; border-radius: 20px; letter-spacing: 0.3px; background: rgba(0,212,170,0.15); color: var(--teal); border: 1px solid rgba(0,212,170,0.25); }
+  .dest-tag.hot { background: rgba(245,166,35,0.15); color: var(--accent); border-color: rgba(245,166,35,0.25); }
+  .dest-tag.new { background: rgba(255,107,53,0.15); color: var(--accent2); border-color: rgba(255,107,53,0.25); }
+
+  /* Empty states */
+  .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 40px 20px; color: var(--muted); font-size: 0.88rem; text-align: center; border: 1px dashed var(--border); border-radius: 14px; }
+  .empty-icon { font-size: 32px; opacity: 0.5; }
+  .empty-state p { max-width: 200px; line-height: 1.5; }
+
+  /* Modal */
+  .modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 100; align-items: center; justify-content: center; }
+  .modal-bg.open { display: flex; }
+  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 32px; width: 440px; max-width: 95vw; animation: fadeUp 0.3s ease; }
+  .modal h2 { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.3rem; margin-bottom: 20px; }
+  .modal label { display: block; font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; margin-top: 14px; }
+  .modal input, .modal select { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.9rem; padding: 10px 13px; outline: none; transition: border-color 0.2s; appearance: none; }
+  .modal input:focus, .modal select:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(0,212,170,0.1); }
+  .modal input::placeholder { color: #3a3f58; }
+  .field-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .modal-actions { display: flex; gap: 10px; margin-top: 24px; }
+  .modal-actions button { flex: 1; padding: 11px; border-radius: 10px; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.88rem; cursor: pointer; border: none; transition: opacity 0.2s, transform 0.15s; }
+  .btn-cancel { background: var(--surface2); color: var(--muted); border: 1px solid var(--border) !important; }
+  .btn-cancel:hover { color: var(--text); }
+  .btn-save { background: linear-gradient(135deg, var(--teal), var(--teal2)); color: var(--bg); box-shadow: 0 3px 14px rgba(0,212,170,0.3); }
+  .btn-save:hover { opacity: 0.9; transform: translateY(-1px); }
+  select option { background: var(--surface2); }
+
+  /* Profile modal */
+  .profile-field { margin-bottom: 14px; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 3px; }
+
+  /* Toast */
+  #toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(80px); background: #1a2035; border: 1px solid rgba(0,212,170,0.25); color: var(--text); padding: 12px 22px; border-radius: 12px; font-size: 0.85rem; box-shadow: 0 8px 28px rgba(0,0,0,0.4); transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1); z-index: 999; display: flex; align-items: center; gap: 9px; white-space: nowrap; pointer-events: none; }
+  .toast-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--teal); display: inline-block; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<div class="bg-orb bg-orb-1"></div>
+<div class="bg-orb bg-orb-2"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="brand">
+    <div class="brand-icon">🌍</div>
+    <span class="brand-name">Orbit<span>Trip</span></span>
+  </div>
+  <div class="nav-section-label">Main</div>
+  <a class="nav-item active" href="#"><span class="nav-icon">🏠</span> Dashboard</a>
+  <a class="nav-item" href="#"><span class="nav-icon">✈️</span> My Trips <span class="nav-badge" id="navTripCount">0</span></a>
+  <a class="nav-item" href="{% url 'city_picker' %}"><span class="nav-icon">🗺️</span> Explore</a>
+  <a class="nav-item" href="{% url 'itinerary' %}"><span class="nav-icon">📋</span> Itinerary</a>
+  <a class="nav-item" href="{% url 'activities' %}"><span class="nav-icon">🎫</span> Activities</a>
+  <a class="nav-item" href="{% url 'budget' %}"><span class="nav-icon">💰</span> Budget</a>
+  <div class="nav-section-label">Account</div>
+  <a class="nav-item" href="#"><span class="nav-icon">🔖</span> Saved Places</a>
+  <a class="nav-item" href="#"><span class="nav-icon">🔔</span> Notifications</a>
+  <a class="nav-item" href="#" onclick="openProfileModal(); return false;"><span class="nav-icon">⚙️</span> Settings</a>
+  <div class="sidebar-footer">
+    <div class="user-chip" onclick="openProfileModal()">
+      <div class="avatar" id="sidebarAvatar">?</div>
+      <div class="user-info">
+        <div class="user-name" id="sidebarName">Set up profile</div>
+        <div class="user-role" id="sidebarRole">Traveller</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <div class="welcome-block">
+      <h1 id="welcomeHeading">Welcome 👋</h1>
+      <p id="welcomeSub"></p>
+    </div>
+    <div class="topbar-actions">
+      <div class="search-bar">🔍&nbsp; Search destinations…</div>
+      <div class="icon-btn" title="Notifications">🔔</div>
+      <button class="plan-btn" onclick="openTripModal()">＋ Plan New Trip</button>
+    </div>
+  </div>
+
+  <div class="stats-row" id="statsRow"></div>
+
+  <div class="quick-actions">
+    <div class="qa-btn" onclick="showToast('Opening hotel search…')"><div class="qa-icon">🏨</div><div class="qa-label">Book Hotel</div></div>
+    <div class="qa-btn" onclick="showToast('Opening flight search…')"><div class="qa-icon">🛫</div><div class="qa-label">Find Flights</div></div>
+    <div class="qa-btn" onclick="showToast('Opening visa checker…')"><div class="qa-icon">🛂</div><div class="qa-label">Visa Check</div></div>
+    <div class="qa-btn" onclick="showToast('Opening packing list…')"><div class="qa-icon">🎒</div><div class="qa-label">Packing List</div></div>
+    <div class="qa-btn" onclick="showToast('Opening currency converter…')"><div class="qa-icon">💱</div><div class="qa-label">Currency</div></div>
+  </div>
+
+  <div class="grid-2">
+    <div>
+      <div class="section-header">
+        <div class="section-title">Recent Trips</div>
+        <a class="section-link" href="#">View all →</a>
+      </div>
+      <div class="trips-list" id="tripsList"></div>
+    </div>
+    <div class="budget-panel">
+      <div class="section-header">
+        <div class="section-title">Budget Highlights</div>
+        <a class="section-link" href="#" onclick="openBudgetModal(); return false;">Edit →</a>
+      </div>
+      <div id="budgetContent"></div>
+    </div>
+  </div>
+
+  <div class="dest-section">
+    <div class="section-header">
+      <div class="section-title">Recommended Destinations</div>
+      <a class="section-link" href="#" onclick="openDestModal(); return false;">+ Add →</a>
+    </div>
+    <div class="dest-grid" id="destGrid"></div>
+  </div>
+</main>
+
+<!-- ADD TRIP MODAL -->
+<div class="modal-bg" id="tripModalBg" onclick="closeBg(event,'tripModalBg')">
+  <div class="modal">
+    <h2>Plan New Trip ✈️</h2>
+    <label>Destination</label>
+    <input type="text" id="inputDest" placeholder="e.g. Rome, Italy">
+    <div class="field-row-2">
+      <div>
+        <label>Emoji</label>
+        <input type="text" id="inputEmoji" placeholder="🏛️" maxlength="4">
+      </div>
+      <div>
+        <label>Status</label>
+        <select id="inputStatus">
+          <option value="planning">Planning</option>
+          <option value="upcoming">Upcoming</option>
+          <option value="completed">Completed</option>
+        </select>
+      </div>
+    </div>
+    <label>Date Range</label>
+    <input type="text" id="inputDates" placeholder="e.g. Jul 10 – Jul 20">
+    <div class="field-row-2">
+      <div>
+        <label>Travellers</label>
+        <input type="number" id="inputTravellers" placeholder="1" min="1" max="50">
+      </div>
+      <div>
+        <label>Budget (USD)</label>
+        <input type="number" id="inputBudget" placeholder="e.g. 2000" min="0">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('tripModalBg')">Cancel</button>
+      <button class="btn-save" onclick="saveTrip()">Add Trip</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD DESTINATION MODAL -->
+<div class="modal-bg" id="destModalBg" onclick="closeBg(event,'destModalBg')">
+  <div class="modal">
+    <h2>Add Recommended Destination 🌐</h2>
+    <label>City Name</label>
+    <input type="text" id="dInputName" placeholder="e.g. Santorini">
+    <div class="field-row-2">
+      <div>
+        <label>Emoji</label>
+        <input type="text" id="dInputEmoji" placeholder="🏛️" maxlength="4">
+      </div>
+      <div>
+        <label>Tag Style</label>
+        <select id="dInputTagType">
+          <option value="">Default (teal)</option>
+          <option value="hot">Hot (amber)</option>
+          <option value="new">New (orange)</option>
+        </select>
+      </div>
+    </div>
+    <label>Country / Region</label>
+    <input type="text" id="dInputCountry" placeholder="e.g. Greece · Europe">
+    <label>Tag Label</label>
+    <input type="text" id="dInputTag" placeholder="e.g. 🔥 Trending">
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('destModalBg')">Cancel</button>
+      <button class="btn-save" onclick="saveDest()">Add Destination</button>
+    </div>
+  </div>
+</div>
+
+<!-- BUDGET MODAL -->
+<div class="modal-bg" id="budgetModalBg" onclick="closeBg(event,'budgetModalBg')">
+  <div class="modal">
+    <h2>Budget Settings 💰</h2>
+    <label>Total Annual Budget (USD)</label>
+    <input type="number" id="bInputTotal" placeholder="e.g. 10000" min="0">
+    <p style="color:var(--muted);font-size:0.78rem;margin-top:8px">Budget categories are derived from your trips automatically.</p>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal('budgetModalBg')">Cancel</button>
+      <button class="btn-save" onclick="saveBudget()">Save Budget</button>
+    </div>
+  </div>
+</div>
+
+<!-- PROFILE MODAL -->
+<div class="modal-bg" id="profileModalBg" onclick="closeBg(event,'profileModalBg')">
+  <div class="modal">
+    <h2>Your Profile 👤</h2>
+    <label>Display Name</label>
+    <input type="text" id="pInputName" placeholder="e.g. Jane Doe">
+    <label>Role</label>
+    <select id="pInputRole">
+      <option value="Traveller">Traveller</option>
+      <option value="Admin">Admin</option>
+    </select>
+    <div class="modal-actions">
+        <a href="{% url 'signup' %}" style="text-decoration:none;display:inline-block;">
+            <button class="btn-cancel" onclick="closeModal('profileModalBg')">Log Out</button>
+       </a>
+      <button class="btn-save" onclick="saveProfile()">Save Profile</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"><span class="toast-dot"></span><span id="toastMsg"></span></div>
+
+<script>
+// ── STATE ──────────────────────────────────────────────────────
+const DEFAULT_STATE = {
+  user: { name: '', role: 'Traveller' },
+  trips: [],
+  budget: { total: 0 },
+  destinations: []
+};
+
+let state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+
+function loadState() {
+  try {
+    const s = localStorage.getItem('orbitrip_v2');
+    if (s) state = JSON.parse(s);
+  } catch(e) {}
+}
+function saveState() {
+  localStorage.setItem('orbitrip_v2', JSON.stringify(state));
+}
+
+// ── HELPERS ────────────────────────────────────────────────────
+function fmt(n) {
+  if (!n && n !== 0) return '$0';
+  return '$' + Number(n).toLocaleString();
+}
+function cap(s) { return s ? s[0].toUpperCase() + s.slice(1) : ''; }
+function greeting() {
+  const h = new Date().getHours();
+  return h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
+}
+function todayStr() {
+  return new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+}
+function stats() {
+  const trips = state.trips;
+  return {
+    total: trips.length,
+    upcoming: trips.filter(t => t.status === 'upcoming').length,
+    completed: trips.filter(t => t.status === 'completed').length,
+    planning: trips.filter(t => t.status === 'planning').length,
+    totalBudget: trips.reduce((s,t) => s + (Number(t.budget)||0), 0),
+    destinations: new Set(trips.map(t => (t.destination||'').split(',').pop()?.trim())).size
+  };
+}
+
+// ── RENDER ─────────────────────────────────────────────────────
+function renderAll() {
+  renderUser();
+  renderStats();
+  renderTrips();
+  renderBudget();
+  renderDestinations();
+}
+
+function renderUser() {
+  const name = state.user.name || '';
+  const displayName = name || 'Traveller';
+  const initial = name ? name[0].toUpperCase() : '?';
+  const s = stats();
+  const upcoming = s.upcoming;
+
+  document.getElementById('sidebarAvatar').textContent = initial;
+  document.getElementById('sidebarName').textContent = displayName;
+  document.getElementById('sidebarRole').textContent = state.user.role || 'Traveller';
+  document.getElementById('welcomeHeading').innerHTML =
+    name ? `${greeting()}, <span>${name}</span> 👋` : `Welcome to OrbitTrip 👋`;
+  document.getElementById('welcomeSub').textContent =
+    `${todayStr()} · ${upcoming} upcoming trip${upcoming !== 1 ? 's' : ''}`;
+}
+
+function renderStats() {
+  const s = stats();
+  const allocated = s.totalBudget;
+  const total = Number(state.budget.total) || 0;
+  const remaining = total > 0 ? total - allocated : null;
+
+  const cards = [
+    { icon: '✈️', label: 'Trips Planned', value: s.total || '—', sub: s.total ? `${s.upcoming} upcoming` : 'No trips yet', warn: false },
+    { icon: '🌍', label: 'Destinations', value: s.destinations || '—', sub: s.completed + ' completed', warn: false },
+    { icon: '💰', label: 'Budget Allocated', value: allocated ? fmt(allocated) : '—', sub: remaining !== null ? fmt(remaining) + ' remaining' : 'Set a total budget', warn: remaining !== null && remaining < allocated * 0.2 },
+    { icon: '⭐', label: 'Saved Destinations', value: state.destinations.length || '—', sub: state.destinations.length ? 'recommended' : 'None added yet', warn: false },
+  ];
+
+  document.getElementById('statsRow').innerHTML = cards.map(c => `
+    <div class="stat-card">
+      <div class="stat-label">${c.icon} ${c.label}</div>
+      <div class="stat-value">${c.value}</div>
+      <div class="stat-sub${c.warn ? ' warn' : ''}">${c.sub}</div>
+    </div>`).join('');
+
+  document.getElementById('navTripCount').textContent = s.total;
+}
+
+function renderTrips() {
+  const el = document.getElementById('tripsList');
+  if (!state.trips.length) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-icon">🗺️</div><p>No trips yet. Hit <strong>Plan New Trip</strong> to get started!</p></div>`;
+    return;
+  }
+  const recent = [...state.trips].slice(-4).reverse();
+  el.innerHTML = recent.map((t, i) => `
+    <div class="trip-card" style="animation-delay:${0.18+i*0.05}s">
+      <div class="trip-thumb">${t.emoji || '🌍'}</div>
+      <div class="trip-info">
+        <div class="trip-name">${t.destination || '—'}</div>
+        <div class="trip-meta">
+          ${t.dates ? `<span>📅 ${t.dates}</span>` : ''}
+          ${t.travellers ? `<span>👥 ${t.travellers} traveller${t.travellers > 1 ? 's' : ''}</span>` : ''}
+        </div>
+      </div>
+      <div class="trip-status status-${t.status}">${cap(t.status)}</div>
+      <div class="trip-budget">
+        <div class="amount">${t.budget ? fmt(t.budget) : '—'}</div>
+        <div class="budget-label">${t.status === 'completed' ? 'spent' : 'budget'}</div>
+      </div>
+    </div>`).join('');
+}
+
+function renderBudget() {
+  const el = document.getElementById('budgetContent');
+  const s = stats();
+  const allocated = s.totalBudget;
+  const total = Number(state.budget.total) || 0;
+  const remaining = total > 0 ? total - allocated : null;
+
+  if (!allocated && !total) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-icon">💰</div><p>No budget data yet. Add trips with budgets or set a total budget.</p></div>`;
+    return;
+  }
+
+  // Group budget by trip status
+  const byStatus = { upcoming: 0, planning: 0, completed: 0 };
+  state.trips.forEach(t => { byStatus[t.status] = (byStatus[t.status] || 0) + (Number(t.budget) || 0); });
+  const colors = { upcoming: ['#00d4aa','#0099cc'], planning: ['#f5a623','#ff6b35'], completed: ['#6b7290','#4a5070'] };
+
+  const displayTotal = total || allocated;
+  el.innerHTML = `
+    <div class="budget-total">
+      <div class="blabel">Total Budget ${new Date().getFullYear()}</div>
+      <div class="big">$<span>${Number(displayTotal).toLocaleString()}</span></div>
+      <div class="bsub">${fmt(allocated)} allocated${remaining !== null ? ' · ' + fmt(remaining) + ' remaining' : ''}</div>
+    </div>
+    ${Object.entries(byStatus).filter(([,v]) => v > 0).map(([k, v]) => {
+      const pct = displayTotal > 0 ? Math.min(100, Math.round((v / displayTotal) * 100)) : 0;
+      const [c1, c2] = colors[k];
+      return `<div class="budget-item">
+        <div class="budget-dot" style="background:${c1}"></div>
+        <div class="budget-item-info">
+          <div class="budget-item-name">${cap(k)} trips</div>
+          <div class="budget-bar-track"><div class="budget-bar-fill" data-w="${pct}%" style="width:0%;background:linear-gradient(90deg,${c1},${c2})"></div></div>
+        </div>
+        <div class="budget-item-amount">${fmt(v)}</div>
+      </div>`;
+    }).join('') || `<p style="color:var(--muted);font-size:0.82rem;text-align:center;padding:12px 0">Add budgets to your trips to see the breakdown.</p>`}`;
+
+  setTimeout(() => {
+    document.querySelectorAll('.budget-bar-fill').forEach(b => { b.style.width = b.dataset.w; });
+  }, 100);
+}
+
+function renderDestinations() {
+  const el = document.getElementById('destGrid');
+  if (!state.destinations.length) {
+    el.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🌐</div><p>No destinations added yet. Use <strong>+ Add</strong> above to add recommendations.</p></div>`;
+    return;
+  }
+  el.innerHTML = state.destinations.map((d, i) => `
+    <div class="dest-card" style="animation:fadeUp 0.5s ${0.28+i*0.05}s ease both">
+      <div class="dest-bg">${d.emoji || '🌍'}</div>
+      <div class="dest-bg-overlay"></div>
+      <div class="dest-info">
+        <div class="dest-name">${d.name}</div>
+        <div class="dest-country">${d.country}</div>
+        <span class="dest-tag ${d.tagType || ''}">${d.tag}</span>
+      </div>
+    </div>`).join('');
+}
+
+// ── MODALS ─────────────────────────────────────────────────────
+function openTripModal() { document.getElementById('tripModalBg').classList.add('open'); }
+function openDestModal()  { document.getElementById('destModalBg').classList.add('open'); }
+function openBudgetModal() {
+  document.getElementById('bInputTotal').value = state.budget.total || '';
+  document.getElementById('budgetModalBg').classList.add('open');
+}
+function openProfileModal() {
+  document.getElementById('pInputName').value = state.user.name || '';
+  document.getElementById('pInputRole').value = state.user.role || 'Traveller';
+  document.getElementById('profileModalBg').classList.add('open');
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+function closeBg(e, id) {
+  if (e.target === document.getElementById(id)) closeModal(id);
+}
+
+function saveTrip() {
+  const dest = document.getElementById('inputDest').value.trim();
+  if (!dest) { showToast('Please enter a destination.'); return; }
+  state.trips.push({
+    id: Date.now(),
+    destination: dest,
+    emoji: document.getElementById('inputEmoji').value.trim() || '🌍',
+    dates: document.getElementById('inputDates').value.trim(),
+    travellers: parseInt(document.getElementById('inputTravellers').value) || 1,
+    budget: parseFloat(document.getElementById('inputBudget').value) || 0,
+    status: document.getElementById('inputStatus').value,
+  });
+  saveState(); renderAll(); closeModal('tripModalBg');
+  ['inputDest','inputEmoji','inputDates','inputTravellers','inputBudget'].forEach(id => document.getElementById(id).value = '');
+  showToast(`✅ "${dest}" added!`);
+}
+
+function saveDest() {
+  const name = document.getElementById('dInputName').value.trim();
+  if (!name) { showToast('Please enter a city name.'); return; }
+  state.destinations.push({
+    name,
+    emoji: document.getElementById('dInputEmoji').value.trim() || '🌍',
+    country: document.getElementById('dInputCountry').value.trim() || '',
+    tag: document.getElementById('dInputTag').value.trim() || '✨ Explore',
+    tagType: document.getElementById('dInputTagType').value,
+  });
+  saveState(); renderAll(); closeModal('destModalBg');
+  ['dInputName','dInputEmoji','dInputCountry','dInputTag'].forEach(id => document.getElementById(id).value = '');
+  showToast(`✅ "${name}" added!`);
+}
+
+function saveBudget() {
+  state.budget.total = parseFloat(document.getElementById('bInputTotal').value) || 0;
+  saveState(); renderAll(); closeModal('budgetModalBg');
+  showToast('✅ Budget saved!');
+}
+
+function saveProfile() {
+  state.user.name = document.getElementById('pInputName').value.trim();
+  state.user.role = document.getElementById('pInputRole').value;
+  saveState(); renderAll(); closeModal('profileModalBg');
+  showToast('✅ Profile updated!');
+}
+
+// ── TOAST ──────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  t.style.transform = 'translateX(-50%) translateY(0)';
+  setTimeout(() => t.style.transform = 'translateX(-50%) translateY(80px)', 2800);
+}
+
+// ── INIT ───────────────────────────────────────────────────────
+loadState();
+renderAll();
+</script>
+</body>
+</html>

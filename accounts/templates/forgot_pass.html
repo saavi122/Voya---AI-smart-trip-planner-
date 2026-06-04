@@ -1,0 +1,540 @@
+<!-- save as reset-password.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Reset Password</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg: #050816;
+      --surface: #0d1326;
+      --surface2: #121a30;
+      --border: rgba(255,255,255,0.07);
+      --accent: #f5a623;
+      --accent2: #ff6b35;
+      --teal: #00e5c3;
+      --text: #f4f7ff;
+      --muted: #7c8ba1;
+      --glow: rgba(0,229,195,0.18);
+      --orange-glow: rgba(245,166,35,0.18);
+    }
+
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+    }
+
+    body{
+        font-family:'Inter',sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        min-height:100vh;
+        overflow-x:hidden;
+        overflow-y:auto;
+        font-size:16px;
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+    }
+
+    .container{
+        display:grid;
+        grid-template-columns: 0.95fr 1.05fr;
+        min-height:100vh;
+        position:relative;
+    }
+
+    /* LEFT PANEL */
+
+    .left-panel{
+      position:relative;
+      padding:32px 38px;
+      overflow:hidden;
+      border-right:1px solid var(--border);
+      background:
+        radial-gradient(circle at 15% 10%, rgba(245,166,35,0.15), transparent 25%),
+        radial-gradient(circle at 70% 85%, rgba(0,229,195,0.16), transparent 25%),
+        linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px),
+        var(--bg);
+
+      background-size:
+        auto,
+        auto,
+        48px 48px,
+        48px 48px,
+        auto;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      margin-bottom:110px;
+    }
+
+    .logo{
+      width:42px;
+      height:42px;
+      border-radius:14px;
+      background: linear-gradient(135deg,var(--accent),var(--accent2));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      box-shadow:0 0 18px var(--orange-glow);
+    }
+
+    .logo svg{
+      width:22px;
+      fill:#000;
+    }
+
+    .brand h2{
+      font-size:30px;
+      font-weight:700;
+    }
+
+    .brand span{
+      color:var(--muted);
+      font-size:12px;
+      letter-spacing:2px;
+    }
+
+    .tag{
+      color:var(--teal);
+      font-size:14px;
+      letter-spacing:2px;
+      margin-bottom:28px;
+    }
+
+    .hero-title{
+      font-size:clamp(40px, 4vw, 58px);
+      line-height:1.02;
+      font-weight:800;
+      max-width:420px;
+      margin-bottom:26px;
+      letter-spacing:-2px;
+    }
+
+    .hero-title .accent{
+      color:var(--accent);
+    }
+
+    .hero-text{
+        max-width:430px;
+        color:var(--muted);
+        font-size:16px;
+        line-height:1.7;
+        margin-bottom:38px;
+    }
+
+    .features{
+      display:flex;
+      flex-direction:column;
+      gap:22px;
+    }
+
+    .feature{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      color:#d7e2ff;
+      font-size:15px;
+    }
+
+    .feature-icon{
+      width:18px;
+      height:18px;
+      border-radius:50%;
+      background:rgba(0,229,195,0.12);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:var(--teal);
+      font-size:11px;
+    }
+
+    .bottom-left{
+      position:absolute;
+      bottom:38px;
+      left:54px;
+      color:var(--muted);
+      font-size:14px;
+      letter-spacing:2px;
+    }
+
+    .status{
+      position:absolute;
+      bottom:38px;
+      right:54px;
+      color:var(--muted);
+      display:flex;
+      align-items:center;
+      gap:10px;
+      letter-spacing:2px;
+      font-size:14px;
+    }
+
+    .dot{
+      width:10px;
+      height:10px;
+      border-radius:50%;
+      background:var(--teal);
+      box-shadow:0 0 15px var(--teal);
+    }
+
+    /* RIGHT PANEL */
+
+    .right-panel{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:48px;
+      position:relative;
+    }
+
+    .form-card{
+      width:100%;
+      max-width:440px;
+    }
+
+    .small-label{
+      color:var(--teal);
+      font-size:15px;
+      letter-spacing:2px;
+      margin-bottom:18px;
+    }
+
+    .form-title{
+      font-size:clamp(34px, 3vw, 48px);
+      line-height:1.08;
+      letter-spacing:-1px;
+      font-weight:800;
+      margin-bottom:24px;
+    }
+
+    .form-description{
+      color:var(--muted);
+      font-size:16px;
+      line-height:1.7;
+      margin-bottom:34px;
+    }
+
+    .security-note{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      color:var(--teal);
+      margin-bottom:38px;
+      letter-spacing:2px;
+      font-size:15px;
+    }
+
+    .form-group{
+      margin-bottom:28px;
+    }
+
+    .form-group label{
+      display:block;
+      margin-bottom:12px;
+      color:#909ab7;
+      letter-spacing:2px;
+      font-size:14px;
+    }
+
+    .input-wrapper{
+      position:relative;
+    }
+
+    .input-wrapper input{
+        width:100%;
+        background:linear-gradient(to right,var(--surface),var(--surface2));
+        border:1px solid var(--border);
+        height:58px;
+        border-radius:16px;
+        padding:0 20px 0 56px;
+        color:var(--text);
+        font-size:16px;
+        outline:none;
+        transition:0.25s ease;
+    }
+
+    .input-wrapper input:focus{
+      border-color:var(--teal);
+      box-shadow:0 0 0 4px rgba(0,229,195,0.08);
+    }
+
+    .input-wrapper svg{
+      position:absolute;
+      left:22px;
+      top:50%;
+      transform:translateY(-50%);
+      width:22px;
+      fill:#7f8bab;
+    }
+
+    .submit-btn{
+      width:120%;
+      height:58px;
+      border:none;
+      border-radius:16px;
+      background:linear-gradient(135deg,var(--accent),#ffbb38);
+      color:#111;
+      font-size:17px;
+      font-weight:700;
+      cursor:pointer;
+      transition:0.25s ease;
+      margin-top:8px;
+      box-shadow:0 12px 30px rgba(245,166,35,0.18);
+    }
+
+    .submit-btn:hover{
+      transform:translateY(-3px);
+      box-shadow:0 30px 60px rgba(245,166,35,0.28);
+    }
+
+    .message{
+      margin-top:24px;
+      padding:18px;
+      border-radius:16px;
+      display:none;
+      font-size:16px;
+    }
+
+    .success{
+      background:rgba(0,229,195,0.12);
+      border:1px solid rgba(0,229,195,0.2);
+      color:var(--teal);
+    }
+
+    .error{
+      background:rgba(255,107,53,0.12);
+      border:1px solid rgba(255,107,53,0.2);
+      color:#ff8b6a;
+    }
+
+    @media(max-width:1100px){
+
+        .container{
+            grid-template-columns:1fr;
+        }
+
+        .left-panel{
+            display:none;
+        }
+
+        .right-panel{
+            padding:42px 24px;
+            min-height:100vh;
+        }
+
+        .form-card{
+            max-width:100%;
+        }
+
+        }
+
+        @media(max-width:768px){
+
+        .form-title{
+            font-size:36px;
+        }
+
+        .form-description{
+            font-size:15px;
+        }
+
+        .input-wrapper input{
+            height:54px;
+            font-size:15px;
+        }
+
+        .submit-btn{
+            height:54px;
+            font-size:16px;
+        }
+
+        }
+
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- LEFT -->
+  <div class="left-panel">
+
+    <div class="brand">
+      <div class="logo">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 2L4 5V11C4 16.5 7.4 21.2 12 22C16.6 21.2 20 16.5 20 11V5L12 2ZM12 12H9V10H12V7H14V10H17V12H14V15H12V12Z"/>
+        </svg>
+      </div>
+
+      <div>
+        <h2>OrbiTrip</h2>
+        <span>SECURE ID • AUTH</span>
+      </div>
+    </div>
+
+    <div class="tag">
+      ✦ ENCRYPTED • END-TO-END
+    </div>
+
+    <div class="hero-title">
+      A new password,<br>
+      <span class="accent">in three fields.</span>
+    </div>
+
+    <div class="hero-text">
+      No emails. No links. Just enter your account email and the password you want — we hash it with bcrypt and update it instantly.
+    </div>
+
+    <div class="features">
+      <div class="feature">
+        <div class="feature-icon">✓</div>
+        Bcrypt-hashed at rest
+      </div>
+
+      <div class="feature">
+        <div class="feature-icon">✓</div>
+        Takes effect immediately
+      </div>
+    </div>
+
+    <div class="bottom-left">
+      V1.0 • 2026
+    </div>
+
+    <div class="status">
+      <div class="dot"></div>
+      ALL SYSTEMS NORMAL
+    </div>
+
+  </div>
+
+  <!-- RIGHT -->
+  <div class="right-panel">
+
+    <div class="form-card">
+
+      <div class="small-label">
+        ACCOUNT RECOVERY
+      </div>
+
+      <div class="form-title">
+        Reset your password
+      </div>
+
+      <div class="form-description">
+        Enter your email and choose a new password. The change takes effect immediately.
+      </div>
+
+      <div class="security-note">
+        🔑 DIRECT RESET • NO EMAIL VERIFICATION
+      </div>
+
+      <form id="resetForm">
+
+        <div class="form-group">
+          <label>EMAIL</label>
+
+          <div class="input-wrapper">
+            <svg viewBox="0 0 24 24">
+              <path d="M20 4H4C2.9 4 2.01 4.9 2.01 6L2 18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM20 8L12 13L4 8V6L12 11L20 6V8Z"/>
+            </svg>
+
+            <input type="email" id="email" placeholder="you@halcyon.dev" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>NEW PASSWORD</label>
+
+          <div class="input-wrapper">
+            <svg viewBox="0 0 24 24">
+              <path d="M18 8H17V6C17 3.79 15.21 2 13 2C10.79 2 9 3.79 9 6V8H8C6.9 8 6 8.9 6 10V20C6 21.1 6.9 22 8 22H18C19.1 22 20 21.1 20 20V10C20 8.9 19.1 8 18 8ZM11 6C11 4.9 11.9 4 13 4C14.1 4 15 4.9 15 6V8H11V6Z"/>
+            </svg>
+
+            <input type="password" id="password" placeholder="6+ chars" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>CONFIRM NEW PASSWORD</label>
+
+          <div class="input-wrapper">
+            <svg viewBox="0 0 24 24">
+              <path d="M18 8H17V6C17 3.79 15.21 2 13 2C10.79 2 9 3.79 9 6V8H8C6.9 8 6 8.9 6 10V20C6 21.1 6.9 22 8 22H18C19.1 22 20 21.1 20 20V10C20 8.9 19.1 8 18 8ZM11 6C11 4.9 11.9 4 13 4C14.1 4 15 4.9 15 6V8H11V6Z"/>
+            </svg>
+
+            <input type="password" id="confirmPassword" placeholder="repeat" required>
+          </div>
+        </div>
+
+        <a href="{% url 'signup' %}" style="text-decoration:none;display:inline-block;margin-top:10px;">
+            <button class="submit-btn" type="submit">
+            → Update password
+            </button>
+       </a>
+
+      </form>
+
+      <div class="message success" id="successMessage">
+        Password updated successfully.
+      </div>
+
+      <div class="message error" id="errorMessage">
+        Passwords do not match.
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+
+  const form = document.getElementById("resetForm");
+  const successMessage = document.getElementById("successMessage");
+  const errorMessage = document.getElementById("errorMessage");
+
+  form.addEventListener("submit", function(e){
+
+    e.preventDefault();
+
+    successMessage.style.display = "none";
+    errorMessage.style.display = "none";
+
+    const password = document.getElementById("password").value;
+    const confirmPassword = document.getElementById("confirmPassword").value;
+
+    if(password.length < 6){
+      errorMessage.innerText = "Password must be at least 6 characters.";
+      errorMessage.style.display = "block";
+      return;
+    }
+
+    if(password !== confirmPassword){
+      errorMessage.innerText = "Passwords do not match.";
+      errorMessage.style.display = "block";
+      return;
+    }
+
+    successMessage.style.display = "block";
+
+    form.reset();
+
+  });
+
+</script>
+
+</body>
+</html>

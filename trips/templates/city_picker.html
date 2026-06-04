@@ -1,0 +1,155 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Orbitrip — Explore Cities</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Unbounded:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{% static 'css/style.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/modal.css' %}" />
+</head>
+<body>
+  <!-- Ambient background orbs -->
+  <div class="ambient-orbs" aria-hidden="true">
+    <span class="orb orb-1"></span>
+    <span class="orb orb-2"></span>
+    <span class="orb orb-3"></span>
+  </div>
+
+  <!-- Top navigation -->
+  <header class="topbar" data-testid="topbar">
+    <div class="topbar__inner">
+      <a class="brand" href="#" data-testid="brand-logo">
+        <span class="brand__mark"></span>
+        <span class="brand__name">orbitrip</span>
+      </a>
+      <nav class="topnav">
+        <a href="#" class="topnav__link is-active" data-testid="nav-explore">Explore</a>
+        <a href="#" class="topnav__link" data-testid="nav-itinerary">Itinerary</a>
+        <a href="#" class="topnav__link" data-testid="nav-saved">Saved</a>
+      </nav>
+      <button class="btn btn--ghost" id="openPickerBtn" data-testid="open-picker-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+        Open City Picker
+      </button>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero__inner">
+      <p class="eyebrow" data-testid="hero-eyebrow">
+        <span class="eyebrow__dot"></span>
+        Plan smarter — search 200k+ cities worldwide
+      </p>
+      <h1 class="hero__title" data-testid="hero-title">
+        Where on earth<br />
+        <span class="grad-text">are you going next?</span>
+      </h1>
+      <p class="hero__sub" data-testid="hero-sub">
+        Search any city, compare cost & popularity, and drop it straight into your trip.
+      </p>
+
+      <!-- Search bar -->
+      <form class="searchbar" id="searchForm" data-testid="search-form" autocomplete="off">
+        <svg class="searchbar__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input
+          id="searchInput"
+          type="text"
+          placeholder="Try “Lisbon”, “Tokyo”, “Buenos Aires”…"
+          data-testid="search-input"
+        />
+        <button type="submit" class="btn btn--primary" data-testid="search-submit">
+          Search
+        </button>
+      </form>
+
+      <!-- Stats strip -->
+      <div class="stats" data-testid="stats-strip">
+        <div class="stat"><strong id="statTotal">0</strong><span>cities found</span></div>
+        <div class="stat"><strong id="statTrip">0</strong><span>in your trip</span></div>
+        <div class="stat"><strong id="statSaved">0</strong><span>saved</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Filters -->
+  <section class="filters" data-testid="filters-section">
+    <div class="filters__inner">
+      <div class="filters__group">
+        <span class="filters__label">Country</span>
+        <div class="chip-row" id="countryChips" data-testid="country-chips">
+          <button class="chip is-active" data-filter-country="all" data-testid="chip-country-all">All</button>
+        </div>
+      </div>
+      <div class="filters__group filters__group--right">
+        <span class="filters__label">View</span>
+        <div class="chip-row" id="viewChips" data-testid="view-chips">
+          <button class="chip is-active" data-view="all" data-testid="chip-view-all">All</button>
+          <button class="chip" data-view="trip" data-testid="chip-view-trip">In Trip</button>
+          <button class="chip" data-view="saved" data-testid="chip-view-saved">Saved</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Grid -->
+  <main class="grid-wrap">
+    <div class="grid" id="cityGrid" data-testid="city-grid"></div>
+
+    <!-- Empty state -->
+    <div class="empty" id="emptyState" data-testid="empty-state" hidden>
+      <div class="empty__art" aria-hidden="true">
+        <svg width="92" height="92" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9"/>
+          <path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>
+        </svg>
+      </div>
+      <h3 class="empty__title">No cities here yet</h3>
+      <p class="empty__sub">Search a city above to seed your map. Everything is saved locally — refresh-proof.</p>
+    </div>
+  </main>
+
+  <footer class="footer" data-testid="footer">
+    <span>© 2026 Orbitrip — built for explorers.</span>
+    <span class="footer__pill">data via open-meteo</span>
+  </footer>
+
+  <!-- Reusable City Picker Modal -->
+  <div class="modal" id="cityPickerModal" data-testid="city-picker-modal" hidden>
+    <div class="modal__backdrop" data-modal-close></div>
+    <div class="modal__panel" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <header class="modal__head">
+        <div>
+          <h2 id="modalTitle" class="modal__title">Add a city to your trip</h2>
+          <p class="modal__sub">Pick from search results — your selection lands in the itinerary.</p>
+        </div>
+        <button class="iconbtn" data-modal-close data-testid="modal-close-btn" aria-label="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </header>
+
+      <form class="searchbar searchbar--modal" id="modalSearchForm" data-testid="modal-search-form" autocomplete="off">
+        <svg class="searchbar__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input id="modalSearchInput" type="text" placeholder="Search any city…" data-testid="modal-search-input" />
+        <button type="submit" class="btn btn--primary btn--sm">Search</button>
+      </form>
+
+      <div class="modal__results" id="modalResults" data-testid="modal-results"></div>
+
+      <div class="modal__empty" id="modalEmpty" data-testid="modal-empty">
+        <p>Start typing above to find a city.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast" data-testid="toast" hidden></div>
+
+  <!-- Scripts -->
+  <script type="module" src="{% static 'js/script.js' %}"></script>
+</body>
+</html>
